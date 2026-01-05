@@ -15,20 +15,28 @@ import { create } from 'zustand';
 import { LEVELS, PIXEL_ART, createBeltPath } from '../data/levels';
 
 const MAX_ACTIVE_BLOBS = 5;
+const PIXEL_SCALE = 2; // 2x resolution - each original pixel becomes 2x2
 
-// Parse pixel art into pixel objects
+// Parse pixel art into pixel objects with scaling
 const parsePixelArt = (art) => {
   const pixels = [];
-  art.pixels.forEach((row, y) => {
-    [...row].forEach((char, x) => {
+  art.pixels.forEach((row, origY) => {
+    [...row].forEach((char, origX) => {
       if (char !== ' ' && art.colorMap[char]) {
-        pixels.push({
-          id: `${x}-${y}`,
-          x,
-          y,
-          color: art.colorMap[char],
-          filled: false,
-        });
+        // Create PIXEL_SCALE x PIXEL_SCALE block for each original pixel
+        for (let dy = 0; dy < PIXEL_SCALE; dy++) {
+          for (let dx = 0; dx < PIXEL_SCALE; dx++) {
+            const x = origX * PIXEL_SCALE + dx;
+            const y = origY * PIXEL_SCALE + dy;
+            pixels.push({
+              id: `${x}-${y}`,
+              x,
+              y,
+              color: art.colorMap[char],
+              filled: false,
+            });
+          }
+        }
       }
     });
   });
@@ -140,12 +148,12 @@ export const usePixelBeltState = create((set, get) => ({
     const stacks = createColorStacks(pixels);
     const queues = distributeToQueues(stacks);
 
-    // Grid dimensions
-    const gridWidth = art.width;
-    const gridHeight = art.height;
+    // Grid dimensions (scaled)
+    const gridWidth = art.width * PIXEL_SCALE;
+    const gridHeight = art.height * PIXEL_SCALE;
 
-    // Pixel size
-    const pixelSize = Math.min(20, Math.floor(300 / Math.max(gridWidth, gridHeight)));
+    // Pixel size - smaller for higher resolution
+    const pixelSize = Math.max(8, Math.floor(280 / Math.max(gridWidth, gridHeight)));
     const beltPath = createBeltPath(gridWidth, gridHeight, pixelSize);
 
     set({

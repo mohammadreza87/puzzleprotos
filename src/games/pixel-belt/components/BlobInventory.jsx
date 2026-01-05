@@ -1,6 +1,6 @@
 /**
  * BlobInventory - Queue stacks, belt status, and launcher slots
- * Optimized for performance using CSS instead of framer-motion
+ * Shows upcoming shooters in queue like Pixel Piano
  */
 
 import { memo } from 'react';
@@ -9,84 +9,117 @@ import { colors, shadows } from '../../../shared/styles/theme';
 
 const MAX_BELT = 5;
 const MAX_SLOTS = 5;
+const QUEUE_VISIBLE = 4; // How many items visible in each queue
 
-const QueueStack = memo(({ stack, onClick, disabled }) => {
+// Single queue item (shooter blob)
+const QueueItem = memo(({ stack, size = 'large', onClick, disabled, isTop }) => {
   if (!stack) {
     return (
       <div
         style={{
-          width: 50,
-          height: 50,
-          borderRadius: 8,
+          width: size === 'large' ? 44 : 32,
+          height: size === 'large' ? 44 : 32,
+          borderRadius: size === 'large' ? 8 : 6,
           border: `2px dashed ${colors.primary[700]}`,
           background: colors.primary[800],
-          opacity: 0.3,
+          opacity: 0.2,
         }}
       />
     );
   }
 
   const colorHex = COLORS[stack.color] || '#888888';
+  const itemSize = size === 'large' ? 44 : 32;
 
   return (
     <div
-      onClick={disabled ? undefined : onClick}
+      onClick={isTop && !disabled ? onClick : undefined}
       style={{
-        width: 50,
-        height: 50,
-        borderRadius: 8,
+        width: itemSize,
+        height: itemSize,
+        borderRadius: size === 'large' ? 8 : 6,
         background: `radial-gradient(circle at 30% 30%, ${colorHex}, ${colorHex}cc)`,
-        border: '3px solid rgba(255,255,255,0.3)',
-        boxShadow: shadows.glow.sm(colorHex),
+        border: isTop ? '3px solid rgba(255,255,255,0.5)' : '2px solid rgba(255,255,255,0.2)',
+        boxShadow: isTop ? shadows.glow.sm(colorHex) : 'none',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        position: 'relative',
-        opacity: disabled ? 0.5 : 1,
+        cursor: isTop && !disabled ? 'pointer' : 'default',
+        opacity: isTop ? 1 : 0.7,
         transition: 'transform 0.1s ease, opacity 0.1s ease',
       }}
-      onMouseEnter={(e) => !disabled && (e.currentTarget.style.transform = 'scale(1.08) translateY(-3px)')}
-      onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1) translateY(0)')}
+      onMouseEnter={(e) => isTop && !disabled && (e.currentTarget.style.transform = 'scale(1.1)')}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
     >
       <span
         style={{
-          fontSize: 18,
+          fontSize: size === 'large' ? 16 : 11,
           fontWeight: 'bold',
           color: '#fff',
-          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+          textShadow: '0 1px 3px rgba(0,0,0,0.6)',
         }}
       >
         {stack.count}
       </span>
-      <div
-        style={{
-          position: 'absolute',
-          top: 6,
-          left: 6,
-          width: 12,
-          height: 12,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.4)',
-        }}
-      />
     </div>
   );
 });
 
+// Vertical queue showing multiple upcoming items
 const Queue = memo(({ queue, queueIndex, onStackTap, disabled }) => {
-  const topStack = queue[0];
+  // Show up to QUEUE_VISIBLE items
+  const visibleItems = queue.slice(0, QUEUE_VISIBLE);
+  const remainingCount = Math.max(0, queue.length - QUEUE_VISIBLE);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-      <QueueStack
-        stack={topStack}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 4,
+    }}>
+      {/* Top item (tappable) */}
+      <QueueItem
+        stack={visibleItems[0]}
+        size="large"
         onClick={() => onStackTap(queueIndex)}
-        disabled={disabled || !topStack}
+        disabled={disabled || !visibleItems[0]}
+        isTop={true}
       />
-      {queue.length > 1 && (
-        <div style={{ fontSize: 10, color: colors.primary[400], fontWeight: 600 }}>
-          +{queue.length - 1}
+
+      {/* Upcoming items (smaller, stacked) */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3,
+        opacity: 0.9,
+      }}>
+        {visibleItems.slice(1).map((stack, i) => (
+          <QueueItem
+            key={stack?.id || i}
+            stack={stack}
+            size="small"
+            isTop={false}
+          />
+        ))}
+
+        {/* Empty slots to show queue capacity */}
+        {visibleItems.length < QUEUE_VISIBLE &&
+          Array.from({ length: QUEUE_VISIBLE - visibleItems.length }).map((_, i) => (
+            <QueueItem key={`empty-${i}`} stack={null} size="small" />
+          ))
+        }
+      </div>
+
+      {/* Remaining count */}
+      {remainingCount > 0 && (
+        <div style={{
+          fontSize: 9,
+          color: colors.primary[400],
+          fontWeight: 600,
+          marginTop: 2,
+        }}>
+          +{remainingCount} more
         </div>
       )}
     </div>
@@ -222,46 +255,43 @@ export const BlobInventory = memo(({
         border: `1px solid ${colors.glass.border}`,
       }}
     >
-      {/* Belt Status */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <span style={{ fontSize: 10, color: colors.neon.yellow, marginRight: 4, fontWeight: 600 }}>
-          BELT
-        </span>
-        {Array.from({ length: MAX_BELT }).map((_, i) => (
-          <BeltBlobIndicator key={i} blob={blobsOnBelt?.[i]} />
-        ))}
-        <span style={{ fontSize: 10, color: colors.primary[400], marginLeft: 4 }}>
-          {beltCount}/{MAX_BELT}
-        </span>
+      {/* Belt & Slots Row */}
+      <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+        {/* Belt Status */}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <span style={{ fontSize: 9, color: colors.neon.yellow, fontWeight: 600 }}>
+            BELT
+          </span>
+          {Array.from({ length: MAX_BELT }).map((_, i) => (
+            <BeltBlobIndicator key={i} blob={blobsOnBelt?.[i]} />
+          ))}
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: 1, height: 30, background: colors.primary[700] }} />
+
+        {/* Launcher Slots */}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <span style={{ fontSize: 9, color: colors.neon.coral, fontWeight: 600 }}>
+            SLOTS
+          </span>
+          {launcherSlots.map((slot, i) => (
+            <LauncherSlot
+              key={i}
+              slot={slot}
+              index={i}
+              onClick={() => onSlotTap?.(i)}
+              disabled={disabled}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Divider */}
       <div style={{ width: '100%', height: 1, background: colors.primary[700] }} />
 
-      {/* Launcher Slots (tappable) */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <span style={{ fontSize: 10, color: colors.neon.coral, marginRight: 4, fontWeight: 600 }}>
-          SLOTS
-        </span>
-        {launcherSlots.map((slot, i) => (
-          <LauncherSlot
-            key={i}
-            slot={slot}
-            index={i}
-            onClick={() => onSlotTap?.(i)}
-            disabled={disabled}
-          />
-        ))}
-        <span style={{ fontSize: 10, color: colors.primary[400], marginLeft: 4 }}>
-          {slotCount}/{MAX_SLOTS}
-        </span>
-      </div>
-
-      {/* Divider */}
-      <div style={{ width: '100%', height: 1, background: colors.primary[700] }} />
-
-      {/* Queues */}
-      <div style={{ display: 'flex', gap: 10 }}>
+      {/* Queues - vertical stacks */}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
         {queues.map((queue, i) => (
           <Queue
             key={i}
@@ -283,7 +313,7 @@ export const BlobInventory = memo(({
       >
         {slotCount >= MAX_SLOTS
           ? 'Slots full! Tap slot to resend'
-          : 'Tap queue to send • Tap slot to resend'}
+          : 'Tap top of queue to send'}
       </div>
     </div>
   );
