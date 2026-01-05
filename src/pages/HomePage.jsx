@@ -28,6 +28,14 @@ const games = [
     gradient: `linear-gradient(135deg, ${colors.neon.orange}, ${colors.neon.coral})`,
     path: '/conveyor-sort',
   },
+  {
+    id: 'pixel-belt',
+    title: 'Pixel Belt',
+    description: 'Fill pixel art from conveyor belt, outside to inside',
+    icon: '🎯',
+    gradient: `linear-gradient(135deg, ${colors.neon.lavender}, ${colors.neon.azure})`,
+    path: '/pixel-belt',
+  },
 ];
 
 const GameCard = ({ game, index }) => {

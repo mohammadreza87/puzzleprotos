@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage';
 const PixelPianoPage = lazy(() => import('./pages/PixelPianoPage'));
 const Coloring3DPage = lazy(() => import('./pages/Coloring3DPage'));
 const ConveyorSortPage = lazy(() => import('./pages/ConveyorSortPage'));
+const PixelBeltPage = lazy(() => import('./pages/PixelBeltPage'));
 
 // Loading fallback
 const LoadingFallback = () => (
@@ -46,6 +47,7 @@ function App() {
         <Route path="/pixel-piano" element={<PixelPianoPage />} />
         <Route path="/coloring-3d" element={<Coloring3DPage />} />
         <Route path="/conveyor-sort" element={<ConveyorSortPage />} />
+        <Route path="/pixel-belt" element={<PixelBeltPage />} />
       </Routes>
     </Suspense>
   );
