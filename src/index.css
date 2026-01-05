@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================================================= */
+
+:root {
+  /* Primary Colors - Warm Mocha */
+  --color-bg-deep: #0D0A09;
+  --color-bg-main: #1A1412;
+  --color-bg-card: #2D2320;
+  --color-bg-elevated: #3D322D;
+  --color-border: #5C4A42;
+  --color-text-muted: #7A6358;
+  --color-accent: #A47864;
+  --color-accent-light: #C4A594;
+  --color-text: #E8DDD4;
+  --color-text-bright: #F5F0EC;
+
+  /* Neon Accents */
+  --color-neon-coral: #FF6B6B;
+  --color-neon-orange: #FFA94D;
+  --color-neon-yellow: #FFE066;
+  --color-neon-mint: #63E6BE;
+  --color-neon-azure: #74C0FC;
+  --color-neon-lavender: #B197FC;
+  --color-neon-rose: #F783AC;
+
+  /* Glass Effects */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-hover: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.2);
+
+  /* Typography */
+  --font-heading: 'Nunito', 'SF Pro Rounded', system-ui, sans-serif;
+  --font-body: 'Inter', 'SF Pro Text', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Borders */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Transitions */
+  --transition-fast: 100ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* =============================================================================
+   BASE STYLES
+   ============================================================================= */
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg-deep);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-deep) 0%,
+    var(--color-bg-main) 30%,
+    var(--color-bg-main) 70%,
+    var(--color-bg-deep) 100%
+  );
+}
+
+/* =============================================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================================= */
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* =============================================================================
+   GLASSMORPHISM UTILITIES
+   ============================================================================= */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+}
+
+.glass-panel {
+  background: rgba(45, 35, 32, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+/* =============================================================================
+   BUTTON BASE STYLES
+   ============================================================================= */
+
+button, [role="button"] {
+  touch-action: manipulation;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* =============================================================================
+   SCROLLBAR
+   ============================================================================= */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* =============================================================================
+   SELECTION
+   ============================================================================= */
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-text-bright);
+}
+
+/* =============================================================================
+   GLOW UTILITIES
+   ============================================================================= */
+
+.glow-coral { box-shadow: 0 0 20px var(--color-neon-coral); }
+.glow-orange { box-shadow: 0 0 20px var(--color-neon-orange); }
+.glow-yellow { box-shadow: 0 0 20px var(--color-neon-yellow); }
+.glow-mint { box-shadow: 0 0 20px var(--color-neon-mint); }
+.glow-azure { box-shadow: 0 0 20px var(--color-neon-azure); }
+.glow-lavender { box-shadow: 0 0 20px var(--color-neon-lavender); }
+.glow-rose { box-shadow: 0 0 20px var(--color-neon-rose); }
+
+/* =============================================================================
+   ANIMATION UTILITIES
+   ============================================================================= */
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* =============================================================================
+   ACCESSIBILITY
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
